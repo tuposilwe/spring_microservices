@@ -2,6 +2,8 @@ package com.rudiger.customer;
 
 import com.rudiger.clients.fraud.FraudCheckResponse;
 import com.rudiger.clients.fraud.FraudClient;
+import com.rudiger.clients.notification.NotificationClient;
+import com.rudiger.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ public class CustomerService {
     private  final  CustomerRepository customerRepository;
     private final RestTemplate restTemplate;
     private final FraudClient fraudClient;
+    private final NotificationClient notificationClient;
     public void registerCustomer(CustomerRegistrationRequest request) {
        
    Customer customer = Customer.builder()
@@ -31,6 +34,16 @@ public class CustomerService {
         if(fraudCheckResponse.isFraudster()){
             throw new IllegalStateException("fraudster");
         }
+
+        notificationClient.sendNotification(
+                new NotificationRequest(
+                        customer.getId(),
+                        customer.getEmail(),
+                        String.format("Hi %s, welcome to Rudigercode...",
+                                customer.getFirstName())
+                )
+        );
+
     }
 }
 
